@@ -62,6 +62,7 @@ class Game extends React.Component {
         this.state = {
             history: [{
                 squares: Array(9).fill(null),
+                positions: Array(0).fill(null),
             }],
             xIsNext: true,
             stepNumber: 0,
@@ -73,13 +74,18 @@ class Game extends React.Component {
         const history = this.state.history.slice(0, this.state.stepNumber + 1);
         const current = history[history.length - 1];
         const squares = current.squares.slice();
+        const positions = current.positions.slice();
+
         if (calculateWinner(squares) || squares[i]) {
             return;
         }
         squares[i] = this.state.xIsNext ? 'X' : 'O';
+        positions.push(i);
+
         this.setState({ 
             history: history.concat([{
                 squares: squares,
+                positions: positions
             }]),
             xIsNext: !this.state.xIsNext, 
             stepNumber: history.length
@@ -96,14 +102,33 @@ class Game extends React.Component {
 
     handleResetButton() {
 
-        const squares = Array(9).fill(null);
         this.setState({
             history: [{
                 squares: Array(9).fill(null),
+                positions: Array(0).fill(null),
             }],
             xIsNext: true,
             stepNumber: 0
         });
+    }
+
+    paintCoord(pos) {
+        
+        var newPos;
+        switch (pos) {
+            case 0:
+            case 1:
+            case 2: newPos = 0; break;
+            case 3: 
+            case 4: 
+            case 5: newPos = 1; break;
+            case 6: 
+            case 7:
+            case 8: newPos = 2; break;
+            default: newPos = 3;
+        }
+
+        return '(' + (newPos) + ', ' + (pos % 3)+ ')';
     }
 
     render() {
@@ -113,8 +138,9 @@ class Game extends React.Component {
         const winner = calculateWinner(current.squares);
 
         const moves = history.map((step, move) => {
+            
             const desc = move ?
-                'Go to move #' + move :
+                'Go to move #' + move + ' - ' + this.paintCoord(step.positions[move-1]):
                 'Go to game start';
             return (
                 <li key={move}>
@@ -135,11 +161,11 @@ class Game extends React.Component {
                 <div className="game-board">
                     <Board 
                         squares={current.squares}
-                        onClick={(i) => this.handleClick(i)}/>
+                        onClick={(i) => this.handleClick(i)} />
                     <div>
                     <div>
                         <ResetGameButton 
-                            onClick={() => this.handleResetButton() }/>
+                            onClick={() => this.handleResetButton()} />
                         </div>
                     </div>
                 </div>
